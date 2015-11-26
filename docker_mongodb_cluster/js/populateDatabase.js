@@ -1,6 +1,8 @@
 use test_database;
 
-for(var i=0; i< 10000; i++) {
+var NO_OF_DOCUMENTS = 100000;
+
+for(var i=0; i< NO_OF_DOCUMENTS; i++) {
     db.test_collections.save({
         nr: i,
         createdDtm: new Date().getTime(),
