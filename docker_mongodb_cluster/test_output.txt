@@ -1,0 +1,481 @@
+:~/IdeaProjects/MongoDB-Docker-Cluster/docker_mongodb_cluster$ sudo ./setup-mongodb-cluster.sh
+********************************************Cleaning the environment
+rm: cannot remove ‘mongo-persisted-data/skydns’: No such file or directory
+rm: cannot remove ‘mongo-persisted-data/skydock’: No such file or directory
+rm: cannot remove ‘mongo-persisted-data/cfg1’: No such file or directory
+rm: cannot remove ‘mongo-persisted-data/mongos1’: No such file or directory
+rm: cannot remove ‘mongo-persisted-data/rs1_srv2_bis’: No such file or directory
+***********************Restart docker to avoid some skydns problems.
+docker.io stop/waiting
+docker.io start/running, process 7735
+***********************************************Setup skydns/skydock.
+125e480c194eb01ab67f4ee8f0ea1151d1b4af099f31c5f0a30ae129419196c6
+155385f8750f61d1a8edf8178a968409f046349a599feb5f035e1a8a82ed948d
+*******************************************Create mongodocker images
+Sending build context to Docker daemon 3.072 kB
+Sending build context to Docker daemon
+Step 0 : FROM ubuntu:latest
+ ---> 96864a7d2df3
+Step 1 : RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 7F0CEB10
+ ---> Using cache
+ ---> 7be1cd9764dd
+Step 2 : RUN echo 'deb http://downloads-distro.mongodb.org/repo/ubuntu-upstart dist 10gen' | tee /etc/apt/sources.list.d/10gen.list
+ ---> Using cache
+ ---> 3bd78c6960d3
+Step 3 : RUN apt-get update && apt-get install -y mongodb-org=2.6.1 mongodb-org-server=2.6.1 mongodb-org-shell=2.6.1 mongodb-org-mongos=2.6.1 mongodb-org-tools=2.6.1
+ ---> Using cache
+ ---> c7d5e87ec587
+Step 4 : RUN mkdir -p /data/mongodb
+ ---> Using cache
+ ---> a0666654b796
+Step 5 : EXPOSE 27017
+ ---> Using cache
+ ---> b3166fa63622
+Step 6 : ENTRYPOINT ["usr/bin/mongod"]
+ ---> Using cache
+ ---> 600e6d9ddaf7
+Successfully built 600e6d9ddaf7
+Sending build context to Docker daemon  2.56 kB
+Sending build context to Docker daemon
+Step 0 : FROM dev0/mongodb:latest
+ ---> 600e6d9ddaf7
+Step 1 : EXPOSE 27017
+ ---> Using cache
+ ---> eff11c4ae922
+Step 2 : ENTRYPOINT ["usr/bin/mongos"]
+ ---> Using cache
+ ---> 73375330123d
+Successfully built 73375330123d
+************************************************Create a replica set
+5a13894019b2b5b5cf951b185e0ef5649969d9b8269fad9b7208b22f948fbd26
+67fad805f34df4b85641fd2a8d2fe21562192a374e57299c2078647795438dcc
+ccba747113b4b40c75c6ce142fda699bef63147b7f1c56708fbd1f2d06222644
+MongoDB shell version: 2.4.10
+connecting to: 127.0.0.1:49153/test
+{
+        "_id" : "rs1",
+        "members" : [
+                {
+                        "_id" : 0,
+                        "host" : "rs1_srv1.mongodb.dev.docker:27017"
+                },
+                {
+                        "_id" : 1,
+                        "host" : "rs1_srv2.mongodb.dev.docker:27017"
+                },
+                {
+                        "_id" : 2,
+                        "host" : "rs1_srv3.mongodb.dev.docker:27017"
+                }
+        ]
+}
+{
+        "info" : "Config now saved locally.  Should come online in about a minute.",
+        "ok" : 1
+}
+bye
+MongoDB shell version: 2.4.10
+connecting to: 127.0.0.1:49153/test
+{
+        "set" : "rs1",
+        "date" : ISODate("2014-11-02T08:49:01Z"),
+        "myState" : 1,
+        "members" : [
+                {
+                        "_id" : 0,
+                        "name" : "rs1_srv1.mongodb.dev.docker:27017",
+                        "health" : 1,
+                        "state" : 1,
+                        "stateStr" : "PRIMARY",
+                        "uptime" : 73,
+                        "optime" : Timestamp(1414918120, 1),
+                        "optimeDate" : ISODate("2014-11-02T08:48:40Z"),
+                        "electionTime" : Timestamp(1414918129, 1),
+                        "electionDate" : ISODate("2014-11-02T08:48:49Z"),
+                        "self" : true
+                },
+                {
+                        "_id" : 1,
+                        "name" : "rs1_srv2.mongodb.dev.docker:27017",
+                        "health" : 1,
+                        "state" : 2,
+                        "stateStr" : "SECONDARY",
+                        "uptime" : 20,
+                        "optime" : Timestamp(1414918120, 1),
+                        "optimeDate" : ISODate("2014-11-02T08:48:40Z"),
+                        "lastHeartbeat" : ISODate("2014-11-02T08:48:59Z"),
+                        "lastHeartbeatRecv" : ISODate("2014-11-02T08:48:59Z"),
+                        "pingMs" : 1,
+                        "syncingTo" : "rs1_srv1.mongodb.dev.docker:27017"
+                },
+                {
+                        "_id" : 2,
+                        "name" : "rs1_srv3.mongodb.dev.docker:27017",
+                        "health" : 1,
+                        "state" : 2,
+                        "stateStr" : "SECONDARY",
+                        "uptime" : 20,
+                        "optime" : Timestamp(1414918120, 1),
+                        "optimeDate" : ISODate("2014-11-02T08:48:40Z"),
+                        "lastHeartbeat" : ISODate("2014-11-02T08:48:59Z"),
+                        "lastHeartbeatRecv" : ISODate("2014-11-02T08:48:59Z"),
+                        "pingMs" : 1,
+                        "syncingTo" : "rs1_srv1.mongodb.dev.docker:27017"
+                }
+        ],
+        "ok" : 1
+}
+bye
+********************************************create some config servers
+eee8bb6c660ea1976bc88f6c8b1618e9a3666086ab961dd91b03d6eecdc92ebc
+************************************************create mongod router
+fb120d72c29be0059b695f9b56da770ae5e0df838328322388cf38763b5806f2
+MongoDB shell version: 2.4.10
+connecting to: 127.0.0.1:49157/test
+{ "shardAdded" : "rs1", "ok" : 1 }
+--- Sharding Status ---
+  sharding version: {
+        "_id" : 1,
+        "version" : 4,
+        "minCompatibleVersion" : 4,
+        "currentVersion" : 5,
+        "clusterId" : ObjectId("5455f009f54f51ea442869b3")
+}
+  shards:
+        {  "_id" : "rs1",  "host" : "rs1/rs1_srv1.mongodb.dev.docker:27017,rs1_srv2.mongodb.dev.docker:27017,rs1_srv3.mongodb.dev.docker:27017" }
+  databases:
+        {  "_id" : "admin",  "partitioned" : false,  "primary" : "config" }
+
+bye
+***********************************************Populate initial data
+MongoDB shell version: 2.4.10
+connecting to: 127.0.0.1:49157/test
+switched to db test_database
+bye
+**********************************************Check data replication
+MongoDB shell version: 2.4.10
+connecting to: 127.0.0.1:49153/test
+switched to db test_database
+Number of documents: 10000
+bye
+MongoDB shell version: 2.4.10
+connecting to: 127.0.0.1:49154/test
+switched to db test_database
+Number of documents: 10000
+bye
+MongoDB shell version: 2.4.10
+connecting to: 127.0.0.1:49155/test
+switched to db test_database
+Number of documents: 10000
+bye
+*******************************Create index on secondary replication
+**********************************************Put down one secondary
+rs1_srv2
+MongoDB shell version: 2.4.10
+connecting to: 127.0.0.1:49153/test
+{
+        "set" : "rs1",
+        "date" : ISODate("2014-11-02T08:49:54Z"),
+        "myState" : 1,
+        "members" : [
+                {
+                        "_id" : 0,
+                        "name" : "rs1_srv1.mongodb.dev.docker:27017",
+                        "health" : 1,
+                        "state" : 1,
+                        "stateStr" : "PRIMARY",
+                        "uptime" : 126,
+                        "optime" : Timestamp(1414918173, 1142),
+                        "optimeDate" : ISODate("2014-11-02T08:49:33Z"),
+                        "electionTime" : Timestamp(1414918129, 1),
+                        "electionDate" : ISODate("2014-11-02T08:48:49Z"),
+                        "self" : true
+                },
+                {
+                        "_id" : 1,
+                        "name" : "rs1_srv2.mongodb.dev.docker:27017",
+                        "health" : 0,
+                        "state" : 8,
+                        "stateStr" : "(not reachable/healthy)",
+                        "uptime" : 0,
+                        "optime" : Timestamp(1414918173, 1142),
+                        "optimeDate" : ISODate("2014-11-02T08:49:33Z"),
+                        "lastHeartbeat" : ISODate("2014-11-02T08:49:53Z"),
+                        "lastHeartbeatRecv" : ISODate("2014-11-02T08:49:47Z"),
+                        "pingMs" : 0,
+                        "syncingTo" : "rs1_srv1.mongodb.dev.docker:27017"
+                },
+                {
+                        "_id" : 2,
+                        "name" : "rs1_srv3.mongodb.dev.docker:27017",
+                        "health" : 1,
+                        "state" : 2,
+                        "stateStr" : "SECONDARY",
+                        "uptime" : 73,
+                        "optime" : Timestamp(1414918173, 1142),
+                        "optimeDate" : ISODate("2014-11-02T08:49:33Z"),
+                        "lastHeartbeat" : ISODate("2014-11-02T08:49:53Z"),
+                        "lastHeartbeatRecv" : ISODate("2014-11-02T08:49:54Z"),
+                        "pingMs" : 0,
+                        "syncingTo" : "rs1_srv1.mongodb.dev.docker:27017"
+                }
+        ],
+        "ok" : 1
+}
+bye
+***********************************Create new secondary on same data
+3fe9b647d8ec859425a73051d88ab3bb9cf871ced54c681d00bf84705be4ddc5
+CONTAINER ID        IMAGE                          COMMAND                CREATED             STATUS                      PORTS                              NAMES
+3fe9b647d8ec        dev0/mongodb:latest            usr/bin/mongod --dbp   5 seconds ago       Up 5 seconds                0.0.0.0:49154->27017/tcp           rs1_srv2_bis
+fb120d72c29b        dev0/mongos:latest             usr/bin/mongos --con   46 seconds ago      Up 45 seconds               0.0.0.0:49157->27017/tcp           mongos1
+eee8bb6c660e        dev0/mongodb:latest            usr/bin/mongod --con   56 seconds ago      Up 56 seconds               0.0.0.0:49156->27017/tcp           cfg1
+ccba747113b4        dev0/mongodb:latest            usr/bin/mongod --rep   2 minutes ago       Up 2 minutes                0.0.0.0:49155->27017/tcp           rs1_srv3
+67fad805f34d        dev0/mongodb:latest            usr/bin/mongod --rep   2 minutes ago       Exited (0) 10 seconds ago                                      rs1_srv2
+5a13894019b2        dev0/mongodb:latest            usr/bin/mongod --rep   2 minutes ago       Up 2 minutes                0.0.0.0:49153->27017/tcp           rs1_srv1
+155385f8750f        crosbymichael/skydock:latest   /go/bin/skydock -ttl   2 minutes ago       Up 2 minutes                                                   skydock
+125e480c194e        crosbymichael/skydns:latest    skydns -http 0.0.0.0   2 minutes ago       Up 2 minutes                8080/tcp, 172.17.42.1:53->53/udp   skydns
+MongoDB shell version: 2.4.10
+connecting to: 127.0.0.1:49154/test
+switched to db test_database
+Number of documents: 10000
+[
+        {
+                "v" : 1,
+                "key" : {
+                        "_id" : 1
+                },
+                "name" : "_id_",
+                "ns" : "test_database.test_collections"
+        },
+        {
+                "v" : 1,
+                "key" : {
+                        "randomValue" : 1
+                },
+                "name" : "randomValue_1",
+                "ns" : "test_database.test_collections",
+                "background" : true
+        },
+        {
+                "v" : 1,
+                "key" : {
+                        "createdDtm" : 1
+                },
+                "name" : "createdDtm_1",
+                "ns" : "test_database.test_collections",
+                "background" : true
+        }
+]
+bye
+***********************************************Restart old secondary
+rs1_srv2_bis
+rs1_srv2
+MongoDB shell version: 2.4.10
+connecting to: 127.0.0.1:49153/test
+{
+        "set" : "rs1",
+        "date" : ISODate("2014-11-02T08:50:25Z"),
+        "myState" : 1,
+        "members" : [
+                {
+                        "_id" : 0,
+                        "name" : "rs1_srv1.mongodb.dev.docker:27017",
+                        "health" : 1,
+                        "state" : 1,
+                        "stateStr" : "PRIMARY",
+                        "uptime" : 157,
+                        "optime" : Timestamp(1414918173, 1142),
+                        "optimeDate" : ISODate("2014-11-02T08:49:33Z"),
+                        "electionTime" : Timestamp(1414918129, 1),
+                        "electionDate" : ISODate("2014-11-02T08:48:49Z"),
+                        "self" : true
+                },
+                {
+                        "_id" : 1,
+                        "name" : "rs1_srv2.mongodb.dev.docker:27017",
+                        "health" : 1,
+                        "state" : 2,
+                        "stateStr" : "SECONDARY",
+                        "uptime" : 3,
+                        "optime" : Timestamp(1414918173, 1142),
+                        "optimeDate" : ISODate("2014-11-02T08:49:33Z"),
+                        "lastHeartbeat" : ISODate("2014-11-02T08:50:24Z"),
+                        "lastHeartbeatRecv" : ISODate("2014-11-02T08:50:24Z"),
+                        "pingMs" : 804
+                },
+                {
+                        "_id" : 2,
+                        "name" : "rs1_srv3.mongodb.dev.docker:27017",
+                        "health" : 1,
+                        "state" : 2,
+                        "stateStr" : "SECONDARY",
+                        "uptime" : 104,
+                        "optime" : Timestamp(1414918173, 1142),
+                        "optimeDate" : ISODate("2014-11-02T08:49:33Z"),
+                        "lastHeartbeat" : ISODate("2014-11-02T08:50:23Z"),
+                        "lastHeartbeatRecv" : ISODate("2014-11-02T08:50:24Z"),
+                        "pingMs" : 2,
+                        "syncingTo" : "rs1_srv1.mongodb.dev.docker:27017"
+                }
+        ],
+        "ok" : 1
+}
+bye
+*******************************************************Execute query
+MongoDB shell version: 2.4.10
+connecting to: 127.0.0.1:49154/test
+switched to db test_database
+{
+        "cursor" : "BtreeCursor randomValue_1",
+        "isMultiKey" : false,
+        "n" : 1,
+        "nscannedObjects" : 1,
+        "nscanned" : 2,
+        "nscannedObjectsAllPlans" : 2,
+        "nscannedAllPlans" : 8,
+        "scanAndOrder" : false,
+        "indexOnly" : false,
+        "nYields" : 0,
+        "nChunkSkips" : 0,
+        "millis" : 0,
+        "indexBounds" : {
+                "randomValue" : [
+                        [
+                                0,
+                                Infinity
+                        ]
+                ]
+        },
+        "allPlans" : [
+                {
+                        "cursor" : "BtreeCursor randomValue_1",
+                        "isMultiKey" : false,
+                        "n" : 1,
+                        "nscannedObjects" : 1,
+                        "nscanned" : 2,
+                        "scanAndOrder" : false,
+                        "indexOnly" : false,
+                        "nChunkSkips" : 0,
+                        "indexBounds" : {
+                                "randomValue" : [
+                                        [
+                                                0,
+                                                Infinity
+                                        ]
+                                ]
+                        }
+                },
+                {
+                        "cursor" : "BtreeCursor createdDtm_1",
+                        "isMultiKey" : false,
+                        "n" : 1,
+                        "nscannedObjects" : 1,
+                        "nscanned" : 2,
+                        "scanAndOrder" : false,
+                        "indexOnly" : false,
+                        "nChunkSkips" : 0,
+                        "indexBounds" : {
+                                "createdDtm" : [
+                                        [
+                                                0,
+                                                Infinity
+                                        ]
+                                ]
+                        }
+                },
+                {
+                        "cursor" : "Complex Plan",
+                        "n" : 0,
+                        "nscannedObjects" : 0,
+                        "nscanned" : 4,
+                        "nChunkSkips" : 0
+                }
+        ],
+        "server" : "67fad805f34d:27017",
+        "filterSet" : false,
+        "stats" : {
+                "type" : "LIMIT",
+                "works" : 2,
+                "yields" : 0,
+                "unyields" : 0,
+                "invalidates" : 0,
+                "advanced" : 1,
+                "needTime" : 0,
+                "needFetch" : 0,
+                "isEOF" : 1,
+                "children" : [
+                        {
+                                "type" : "KEEP_MUTATIONS",
+                                "works" : 1,
+                                "yields" : 0,
+                                "unyields" : 0,
+                                "invalidates" : 0,
+                                "advanced" : 1,
+                                "needTime" : 0,
+                                "needFetch" : 0,
+                                "isEOF" : 0,
+                                "children" : [
+                                        {
+                                                "type" : "FETCH",
+                                                "works" : 1,
+                                                "yields" : 0,
+                                                "unyields" : 0,
+                                                "invalidates" : 0,
+                                                "advanced" : 1,
+                                                "needTime" : 0,
+                                                "needFetch" : 0,
+                                                "isEOF" : 0,
+                                                "alreadyHasObj" : 0,
+                                                "forcedFetches" : 0,
+                                                "matchTested" : 1,
+                                                "children" : [
+                                                        {
+                                                                "type" : "IXSCAN",
+                                                                "works" : 1,
+                                                                "yields" : 0,
+                                                                "unyields" : 0,
+                                                                "invalidates" : 0,
+                                                                "advanced" : 1,
+                                                                "needTime" : 0,
+                                                                "needFetch" : 0,
+                                                                "isEOF" : 0,
+                                                                "keyPattern" : "{ randomValue: 1.0 }",
+                                                                "boundsVerbose" : "field #0['randomValue']: (0.0, inf.0]",
+                                                                "isMultiKey" : 0,
+                                                                "yieldMovedCursor" : 0,
+                                                                "dupsTested" : 0,
+                                                                "dupsDropped" : 0,
+                                                                "seenInvalidated" : 0,
+                                                                "matchTested" : 0,
+                                                                "keysExamined" : 2,
+                                                                "children" : [ ]
+                                                        }
+                                                ]
+                                        }
+                                ]
+                        }
+                ]
+        }
+}
+bye
+***********************************************Populate initial data
+MongoDB shell version: 2.4.10
+connecting to: 127.0.0.1:49157/test
+switched to db test_database
+bye
+**********************************************Check data replication
+MongoDB shell version: 2.4.10
+connecting to: 127.0.0.1:49153/test
+switched to db test_database
+Number of documents: 20000
+bye
+MongoDB shell version: 2.4.10
+connecting to: 127.0.0.1:49154/test
+switched to db test_database
+Number of documents: 20000
+bye
+MongoDB shell version: 2.4.10
+connecting to: 127.0.0.1:49155/test
+switched to db test_database
+Number of documents: 20000
+bye
