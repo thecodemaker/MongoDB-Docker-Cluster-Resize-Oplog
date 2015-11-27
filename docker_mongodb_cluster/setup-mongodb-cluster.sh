@@ -26,6 +26,7 @@ sleep 2
 echo "*******************************************Create mongodocker images"
 docker build -t dev0/mongodb mongod
 docker build -t dev0/mongos mongos
+docker build -t dev0/mongoconfig mongoconfig
 
 echo "************************************************Create a replica set"
 for i in {1..3}
@@ -39,8 +40,7 @@ do
         --dns ${DOCKERIP}  \
         --name ${container_name} \
         -v ${data_dir}:/data/mongodb \
-        -P -i -d dev0/mongodb \
-        --replSet rs1 --dbpath /data/mongodb --noprealloc --smallfiles --profile=0 --slowms=-1
+        -P -i -d dev0/mongodb
 
     sleep 2
 done
@@ -71,7 +71,7 @@ docker run \
     --dns ${DOCKERIP} \
     --name cfg1 \
     -v "`pwd`/mongo-persisted-data/cfg1":/data/mongodb \
-    -P -i -d dev0/mongodb \
+    -P -i -d dev0/mongoconfig \
     --configsvr --dbpath /data/mongodb --noprealloc --smallfiles --profile=0  --slowms=-1 --port 27017
 
 sleep 10
