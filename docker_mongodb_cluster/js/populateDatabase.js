@@ -1,6 +1,6 @@
 use test_database;
 
-var NO_OF_DOCUMENTS = 100000;
+var NO_OF_DOCUMENTS = 50000;
 
 for(var i=0; i< NO_OF_DOCUMENTS; i++) {
     db.test_collections.save({

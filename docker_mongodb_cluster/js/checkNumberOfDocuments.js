@@ -2,7 +2,7 @@ use test_database;
 
 rs.slaveOk();
 
-var NO_OF_DOCUMENTS = 100000;
+var NO_OF_DOCUMENTS = 50000;
 
 var count = db.test_collections.count();
 if (count != NO_OF_DOCUMENTS) {

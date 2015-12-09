@@ -25,16 +25,16 @@ sleep 2
 
 echo "*******************************************Create mongodocker images"
 echo "build dev0/mongobase"
-docker build --no-cache=true -t dev0/mongobase mongobase
+docker build -t dev0/mongobase mongobase
 
 echo "build dev0/mongodb"
-docker build --no-cache=true -t dev0/mongodb mongod
+docker build -t dev0/mongodb mongod
 
 echo "build dev0/mongoconfig"
-docker build --no-cache=true -t dev0/mongoconfig mongoconfig
+docker build -t dev0/mongoconfig mongoconfig
 
 echo "build dev0/mongos"
-docker build --no-cache=true -t dev0/mongos mongos
+docker build -t dev0/mongos mongos
 
 echo "************************************************Create a replica set"
 for i in {1..3}
@@ -115,14 +115,7 @@ do
     sleep 5
 done
 
-echo "**********************************************Get oplog size before change"
-
-for i in {1..3}
-do
-    mongo --port $(docker port rs1_srv${i} 27017|cut -d ":" -f2) < js/getOplogSize.js
-
-    sleep 5
-done
+./resize-mongodb-oplog.sh
 
 ####sudo docker logs rs1_srv1
 ####sudo docker logs rs1_srv2
@@ -130,4 +123,3 @@ done
 ###
 ####sudo docker logs cfg1
 ####sudo docker logs mongos1
-###
