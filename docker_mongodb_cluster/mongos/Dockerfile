@@ -1,4 +1,4 @@
-FROM dev0/mongodb:latest
+FROM dev0/mongobase:latest
 
 EXPOSE 27017
 ENTRYPOINT ["usr/bin/mongos"]
